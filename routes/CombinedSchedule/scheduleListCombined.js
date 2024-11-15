@@ -221,7 +221,7 @@ scheduleListCombined.post(
   "/combinedTaksShowDwgName",
   jsonParser,
   async (req, res, next) => {
-    // console.log("req.body",req.body)
+    console.log("req.body",req.body)
     try {
       mchQueryMod(
         `SELECT * from magodmis.task_partslist where TaskNo='${req.body.TaskNo}'`,
