@@ -77,52 +77,117 @@ var jsonParser = bodyParser.json();
 // });
 // veeranna
 
+// userRouter.post(`/login`, async (req, res, next) => {
+// 	try {
+// 		const username = req.body.username;
+// 		const passwd = req.body.password;
+
+// 		let passwrd = CryptoJS.SHA512(req.body.password);
+// 		console.log(passwrd);
+// 		if (!username || !passwrd) {
+// 			res.send(createError.BadRequest());
+// 			return; // Add return to stop execution after sending the response
+// 		}
+
+// 		setupQueryMod(
+// 			`Select usr.Name, usr.UserName,usr.Password,usr.Role, unt.UnitName, unt.Current, usr.ActiveUser from magod_setup.magod_userlist usr
+//       left join magod_setup.unit_info unt on unt.UnitID = usr.UnitID WHERE usr.UserName = '${username}' and usr.ActiveUser = '1'`,
+// 			async (err, d) => {
+// 				if (err) {
+// 					logger.error(err);
+// 					res.send(createError.InternalServerError()); // Send appropriate error response
+// 					return;
+// 				}
+
+// 				let data = d;
+// 				if (data.length > 0) {
+// 					if (data[0]["Password"] == passwrd) {
+// 						delete data[0]["Password"];
+
+// 						setupQueryMod(
+// 							`Select m.MenuUrl from magod_setup.menumapping mm
+//                 left outer join magod_setup.menus m on m.Id = mm.MenuId
+//                 where mm.Role = '${data[0]["Role"]}' and mm.ActiveMenu = '1'`,
+// 							async (err, mdata) => {
+// 								if (err) {
+// 									logger.error(err);
+// 									res.send(createError.InternalServerError()); // Send appropriate error response
+// 									return;
+// 								}
+
+// 								let menuarray = [];
+// 								mdata.forEach((element) => {
+// 									menuarray.push(element["MenuUrl"]);
+// 								});
+// 								let accessToken = await signAccessToken(data[0]["UserName"]);
+// 								res.send({
+// 									accessToken: accessToken,
+// 									data: { ...data, access: menuarray },
+// 								});
+// 								logger.info(`Login Success - ${data[0]["UserName"]}`);
+// 							}
+// 						);
+// 					} else {
+// 						res.send(createError.Unauthorized("Invalid Username/Password"));
+// 						logger.error(`Login Failed - ${username} IP : ${req.ip}`);
+// 					}
+// 				} else {
+// 					res.send(createError.Unauthorized("Invalid Username/Password"));
+// 					logger.error(`Login Failed - ${username} IP : ${req.ip}`);
+// 				}
+// 			}
+// 		);
+// 	} catch (error) {
+// 		next(error);
+// 		logger.error(`Error - ${error}`);
+// 	}
+// });
+
 userRouter.post(`/login`, async (req, res, next) => {
   try {
+    console.log("login");
     const username = req.body.username;
     const passwd = req.body.password;
 
     let passwrd = CryptoJS.SHA512(req.body.password);
     console.log(passwrd);
-    if (!username || !passwrd) {
-      res.send(createError.BadRequest());
-      return; // Add return to stop execution after sending the response
-    }
+    if (!username || !passwrd) res.send(createError.BadRequest());
 
     setupQueryMod(
-      `Select usr.Name, usr.UserName,usr.Password,usr.Role, unt.UnitName, unt.Current, usr.ActiveUser from magod_setup.magod_userlist usr
-      left join magod_setup.unit_info unt on unt.UnitID = usr.UnitID WHERE usr.UserName = '${username}' and usr.ActiveUser = '1'`,
+      `Select usr.Name, usr.UserName,usr.Password,usr.Role, unt.UnitName,usr.ActiveUser,unt.State_Id,unt.GST_No from magod_setup.magod_userlist usr
+        left join magod_setup.magodlaser_units unt on unt.UnitID = usr.UnitID WHERE usr.UserName = '${username}' and usr.ActiveUser = '1'`,
       async (err, d) => {
-        if (err) {
-          logger.error(err);
-          res.send(createError.InternalServerError()); // Send appropriate error response
-          return;
-        }
-
+        if (err) logger.error(err);
         let data = d;
+        console.log("data", data);
         if (data.length > 0) {
           if (data[0]["Password"] == passwrd) {
             delete data[0]["Password"];
 
             setupQueryMod(
-              `Select m.MenuUrl from magod_setup.menumapping mm
+              `Select m.MenuUrl,ModuleId  from magod_setup.menumapping mm
                 left outer join magod_setup.menus m on m.Id = mm.MenuId
                 where mm.Role = '${data[0]["Role"]}' and mm.ActiveMenu = '1'`,
               async (err, mdata) => {
-                if (err) {
-                  logger.error(err);
-                  res.send(createError.InternalServerError()); // Send appropriate error response
-                  return;
-                }
-
+                if (err) logger.error(err);
                 let menuarray = [];
                 mdata.forEach((element) => {
                   menuarray.push(element["MenuUrl"]);
                 });
+                const moduleIds = [
+                  ...new Set(
+                    mdata
+                      .map((menu) => menu.ModuleId)
+                      .filter((id) => id !== null)
+                  ),
+                ];
                 let accessToken = await signAccessToken(data[0]["UserName"]);
+
                 res.send({
                   accessToken: accessToken,
                   data: { ...data, access: menuarray },
+                  moduleIds: moduleIds,
+                  // access: menuarray,
                 });
                 logger.info(`Login Success - ${data[0]["UserName"]}`);
               }
@@ -135,14 +200,17 @@ userRouter.post(`/login`, async (req, res, next) => {
           res.send(createError.Unauthorized("Invalid Username/Password"));
           logger.error(`Login Failed - ${username} IP : ${req.ip}`);
         }
+
+        //      res.send({...data, decPass, encrypted: encrypted.toString(), decrypted: decrypted.toString(CryptoJS.enc.Utf8)});
       }
     );
+
+    // res.send(createError.Unauthorized("Invalid Username/Password"))
   } catch (error) {
     next(error);
     logger.error(`Error - ${error}`);
   }
 });
-
 // Working msg is sent as blank
 // userRouter.post(`/savemenurolemapping`, async (req, res, next) => {
 //     console.log("Save Menu Role Mapping API Call")
