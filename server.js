@@ -53,6 +53,7 @@ const analysisRouter = require("./routes/analysis");
 const accountsRouter = require("./routes/accounts");
 const fileRouter = require("./routes/files");
 const orderListRouter = require("./routes/OrderList/OrderList");
+
 const { logger } = require("./helpers/logger");
 
 const ScheduleListRouter = require("./routes/OrderRoutes/ScheduleList");
@@ -117,6 +118,7 @@ const PDFRouter = require("./routes/OrderRoutes/PDF");
 // const NCprogramRoter=require("./routes/OrderRoutes/NCprogram");
 // running no
 const runningNoRouter = require("./routes/runningNo");
+const savePDF = require("./routes/SavePDFServer");
 
 app.use("/runningNo", runningNoRouter);
 // app.use("/NCProgram",NCprogramRoter)
@@ -130,6 +132,7 @@ app.use("/profarmaInvList", ProfarmaInvListRouter);
 app.use("/orderPackingNoteAndInvoice", PackingNoteAndInvoiceRouter);
 app.use("/pdf", PDFRouter);
 app.use("/profarmaInvForm", ProfarmaInvFormRouter);
+app.use("/PDF",savePDF);
 
 // app.use(fileUpload());
 
@@ -146,6 +149,7 @@ app.use((err, req, res, next) => {
 
 // starting the server
 app.listen(process.env.PORT, () => {
-  console.log("Server running on port", process.env.PORT);
+  // console.log("Server running on port", process.env.PORT);
+  console.log("Running successfully");
   // logger.info("listening on port", process.env.PORT);
 });
