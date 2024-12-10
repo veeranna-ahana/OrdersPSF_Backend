@@ -1818,23 +1818,49 @@ ScheduleListRouter.post(`/PrintPdf`, async (req, res, next) => {
 });
 
 //getCustomerName
-ScheduleListRouter.post(`/getCustomerName`, async (req, res, next) => {
-	// console.log("req.body /getCustomerName is",req.body);
-	let query = `SELECT Cust_name FROM magodmis.cust_data  where Cust_Code='${req.body.formdata[0].Cust_Code}'
-  `;
+// ScheduleListRouter.post(`/getCustomerName`, async (req, res, next) => {
+// 	// console.log("req.body /getCustomerName is",req.body);
+// 	console.log("req.body /getCustomerName is",req.body.formdata[0].Cust_Code);
+// 	let query = `SELECT Cust_name FROM magodmis.cust_data  where Cust_Code='${req.body.formdata[0].Cust_Code}'
+//   `;
 
-	try {
-		misQueryMod(query, (err, data) => {
-			if (err) {
-				console.log("err", err);
-			} else {
-				res.send(data);
-			}
-		});
-	} catch (error) {
-		next(error);
+// 	try {
+// 		misQueryMod(query, (err, data) => {
+// 			if (err) {
+// 				console.log("err", err);
+// 			} else {
+// 				res.send(data);
+// 			}
+// 		});
+// 	} catch (error) {
+// 		next(error);
+// 	}
+// });
+
+ScheduleListRouter.post(`/getCustomerName`, async (req, res, next) => {
+	// console.log("req.body /getCustomerName is", req.body?.formdata?.[0]?.Cust_Code);
+  
+	const query = `SELECT Cust_name FROM magodmis.cust_data WHERE Cust_Code = ?`;
+	const custCode = req.body?.formdata?.[0]?.Cust_Code;
+  
+	if (!custCode) {
+	  return res.status(400).json({ error: "Cust_Code is required" });
 	}
-});
+  
+	try {
+	  misQueryMod(query, [custCode], (err, data) => {
+		if (err) {
+		  console.error("Error executing query:", err);
+		  return res.status(500).json({ error: "Database query error" });
+		}
+		res.status(200).send(data);
+	  });
+	} catch (error) {
+	  console.error("Error in /getCustomerName route:", error);
+	  next(error);
+	}
+  });
+  
 
 //get customer sumary data  (customerinfo table)
 ScheduleListRouter.post(`/getCustomerSummary`, async (req, res, next) => {
