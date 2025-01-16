@@ -351,6 +351,7 @@ CombinedScheduleCreate.post(
     }
   }
 );
+
 // Function to insert into combined_schedule and return cmbSchId
 const insertIntoCombinedSchedule = async (custCode) => {
   const result = await mchQueryMod1(
@@ -708,7 +709,7 @@ CombinedScheduleCreate.post(
     if (req.body.type === "JobWork") {
       try {
         mchQueryMod(
-          `SELECT * FROM magodmis.orderschedule  WHERE Order_No= '${req.body.combinedScheduleNo}' and PO='Combined'`,
+          `SELECT * FROM magodmis.orderschedule  WHERE Order_No= '${req.body.combinedScheduleNo}'`, // and PO='Combined'
           (err, data) => {
             if (err) logger.error(err);
             //console.log(data)
