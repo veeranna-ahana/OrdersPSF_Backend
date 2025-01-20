@@ -424,7 +424,7 @@ ordersRouter.post("/getOrderDataforFindOrder", async (req, res) => {
 });
 
 ordersRouter.post(`/getOrderDetailsByOrdrNoAndType`, async (req, res, next) => {
-  // //console.log("req", req.body);
+  console.log("req 123", req.body);
   try {
     // const ordtype = req.body.ordtype;
     misQueryMod(
@@ -445,6 +445,13 @@ ordersRouter.post(`/getOrderDetailsByOrdrNoAndType`, async (req, res, next) => {
                   magodmis.order_list.Order_No = '${req.body.orderNo}'`,
               async (err, custData) => {
                 if (err) logger.error(err);
+                console.log(
+                  "orderData",
+                  orderData.length,
+                  "custDat",
+                  custData.length
+                );
+
                 res.send({ orderData: orderData, custData: custData });
               }
             );
