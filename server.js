@@ -64,6 +64,7 @@ const NCProgramRouter = require("./routes/OrderRoutes/NCprogram");
 const taskSheet = require("./routes/taskSheet");
 const solidState = require("./routes/solidState");
 const co2 = require("./routes/co2");
+const pdf = require("./routes/pdf");
 
 app.use(bodyParser.json());
 app.use("/user", userRouter);
@@ -104,6 +105,7 @@ app.use("/NCProgram", NCProgramRouter);
 app.use("/taskSheet", taskSheet);
 app.use("/solidState", solidState);
 app.use("/co2", co2);
+app.use("/ISOpdf", pdf);
 
 // Deleted routess
 // NEW ORDER ROUTES
@@ -132,7 +134,7 @@ app.use("/profarmaInvList", ProfarmaInvListRouter);
 app.use("/orderPackingNoteAndInvoice", PackingNoteAndInvoiceRouter);
 app.use("/pdf", PDFRouter);
 app.use("/profarmaInvForm", ProfarmaInvFormRouter);
-app.use("/PDF",savePDF);
+app.use("/PDF", savePDF);
 
 // app.use(fileUpload());
 
