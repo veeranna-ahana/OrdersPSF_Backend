@@ -136,7 +136,7 @@ ScheduleListRouter.post(`/getFormDeatils`, async (req, res, next) => {
 ScheduleListRouter.post(`/save`, async (req, res, next) => {
   // Constructing the first query to update orderscheduledetails table
 
-//   console.log("req.body.formdata", req.body.formdata);
+  //   console.log("req.body.formdata", req.body.formdata);
 
   let query = `UPDATE magodmis.orderscheduledetails o,
     (SELECT CASE
@@ -1178,12 +1178,12 @@ ScheduleListRouter.post(`/scheduleAfterLogin`, async (req, res, next) => {
             let neworderSch = `${req.body.formdata[0].Order_No} ${nextSRL}`;
 
             let updateSRLQuery = `UPDATE magodmis.orderschedule 
-                                  SET OrdSchNo='${neworderSch}', 
-                                      ScheduleNo='${nextSRL}', 
-                                      Schedule_status='Tasked', 
-                                      schTgtDate='${formattedDate}', 
-                                      ScheduleDate=now() 
-                                  WHERE ScheduleId='${req.body.formdata[0].ScheduleId}'`;
+                   SET OrdSchNo='${neworderSch}', 
+                       ScheduleNo='${nextSRL}', 
+                       Schedule_status='Tasked', 
+                       schTgtDate=adddate(curdate(), INTERVAL 5 DAY), 
+                       ScheduleDate=now() 
+                   WHERE ScheduleId='${req.body.formdata[0].ScheduleId}'`;
 
             let updateQuery2 = `UPDATE orderscheduledetails SET ScheduleNo='${neworderSch}', Schedule_Srl='${nextSRL}' 
                                 WHERE ScheduleId='${req.body.formdata[0].ScheduleId}'`;
