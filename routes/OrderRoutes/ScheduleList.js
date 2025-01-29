@@ -11,6 +11,7 @@ const {
   misQuery,
   mchQueryMod,
 } = require("../../helpers/dbconn");
+const { log } = require("winston");
 
 ScheduleListRouter.post(`/getScheduleListData`, async (req, res, next) => {
   // const scheduleType = req.body.type === 'Service' ? req.body.type : req.body.scheduleType;
@@ -480,12 +481,20 @@ ScheduleListRouter.post(`/onClickCancel`, async (req, res, next) => {
         if (data && data.length > 0) {
           const resultQuery = data[0]; // Assuming only one row is returned
 
-          if (resultQuery.QtyProgrammed > 0) {
+          console.log("Inside if", resultQuery);
+
+          const QtyProgrammed = resultQuery.QtyProgrammed;
+
+          console.log("QtyProgrammedmmmm", QtyProgrammed);
+
+          if (QtyProgrammed > 0) {
             // Execute the update queries
             const updateQuery1 = `UPDATE magodmis.orderscheduledetails o SET o.QtyScheduled=0 WHERE o.SchDetailsID=${resultQuery.SchDetailsID};`;
             const updateQuery2 = `UPDATE order_details o SET o.QtyScheduled=o.QtyScheduled-${resultQuery.QtyScheduled} WHERE o.OrderDetailID=${resultQuery.OrderDetailID};`;
             const updateQuery3 = `UPDATE orderschedule SET Schedule_Status='Cancelled' WHERE ScheduleId=${req.body.newState[0].ScheduleId};`;
-            const deleteQuery = `DELETE magodmis.t, magodmis.n FROM magodmis.nc_task_list AS n, magodmis.task_partslist AS t WHERE n.ScheduleID='${req.body.newState[0].ScheduleId}' AND t.NcTaskId=n.NcTaskId;`;
+            // const deleteQuery = `DELETE magodmis.t, magodmis.n FROM magodmis.nc_task_list AS n, magodmis.task_partslist AS t WHERE n.ScheduleID='${req.body.newState[0].ScheduleId}' AND t.NcTaskId=n.NcTaskId;`;
+            const deleteQuery = `DELETE n, t FROM magodmis.nc_task_list AS n JOIN magodmis.task_partslist AS t ON t.NcTaskId = n.NcTaskId 
+                                 WHERE n.ScheduleID = '${req.body.newState[0].ScheduleId}';`;
 
             misQueryMod(updateQuery1, (err, result1) => {
               if (err) {
