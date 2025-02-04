@@ -1596,9 +1596,60 @@ ScheduleListRouter.get(`/getSalesContact`, async (req, res, next) => {
 });
 
 //OnClick of Performance
+// ScheduleListRouter.post(`/onClickPerformce`, async (req, res, next) => {
+//   console.log("formdata", req.body.TaskMaterialData[0].Machine);
+
+//   try {
+//     const scheduleId = req.body.formdata[0].ScheduleId;
+//     const machine = req.body.TaskMaterialData[0].Machine;
+
+//     // Execute the first query
+//     executeFirstQuery(scheduleId, (err, data) => {
+//       if (err) {
+//         console.log("err", err);
+//         return next(err); // Pass the error to the error handling middleware
+//       }
+//       // Execute the second query
+//       executeSecondQuery(scheduleId, (err, data1) => {
+//         if (err) {
+//           console.log("err", err);
+//           return next(err); // Pass the error to the error handling middleware
+//         }
+
+//         // Create a map of NcTaskId to MachineTime
+//         const machineTimeMap = {};
+//         data1.forEach((row) => {
+//           machineTimeMap[row.NcTaskId] = row.MachineTime;
+//         });
+
+//         // Calculate HourRate and TargetHourRate for each row in data
+//         data.forEach((row) => {
+//           const machineTime = machineTimeMap[row.NcTaskId];
+//           if (machineTime !== undefined) {
+//             row.MachineTime = machineTime;
+//             row.HourRate = row.JWValue / machineTime;
+//             row.TargetHourRate = row.MaterialValue / machineTime;
+//           } else {
+//             row.MachineTime = "Not Processed";
+//             row.HourRate = "Not Invoiced";
+//             row.TargetHourRate = "Not Invoiced";
+//           }
+//         });
+
+//         res.send(data); // Send the resulting data array as response
+//       });
+//     });
+//   } catch (error) {
+//     next(error); // Pass any uncaught errors to the error handling middleware
+//   }
+// });
+
 ScheduleListRouter.post(`/onClickPerformce`, async (req, res, next) => {
+  console.log("formdata", req.body.TaskMaterialData[0].Machine);
+
   try {
     const scheduleId = req.body.formdata[0].ScheduleId;
+    const machine = req.body.TaskMaterialData[0].Machine;
 
     // Execute the first query
     executeFirstQuery(scheduleId, (err, data) => {
@@ -1606,6 +1657,7 @@ ScheduleListRouter.post(`/onClickPerformce`, async (req, res, next) => {
         console.log("err", err);
         return next(err); // Pass the error to the error handling middleware
       }
+
       // Execute the second query
       executeSecondQuery(scheduleId, (err, data1) => {
         if (err) {
@@ -1613,27 +1665,43 @@ ScheduleListRouter.post(`/onClickPerformce`, async (req, res, next) => {
           return next(err); // Pass the error to the error handling middleware
         }
 
-        // Create a map of NcTaskId to MachineTime
-        const machineTimeMap = {};
-        data1.forEach((row) => {
-          machineTimeMap[row.NcTaskId] = row.MachineTime;
-        });
-
-        // Calculate HourRate and TargetHourRate for each row in data
-        data.forEach((row) => {
-          const machineTime = machineTimeMap[row.NcTaskId];
-          if (machineTime !== undefined) {
-            row.MachineTime = machineTime;
-            row.HourRate = row.JWValue / machineTime;
-            row.TargetHourRate = row.MaterialValue / machineTime;
-          } else {
-            row.MachineTime = "Not Processed";
-            row.HourRate = "Not Invoiced";
-            row.TargetHourRate = "Not Invoiced";
+        // Execute the third query to get TgtRate
+        const query = `SELECT TgtRate FROM machine_data.machine_list WHERE refName = '${machine}'`;
+        misQueryMod(query, (err, tgtRateData) => {
+          if (err) {
+            console.log("err", err);
+            return next(err); // Pass the error to the error handling middleware
           }
-        });
 
-        res.send(data); // Send the resulting data array as response
+          // Extract TgtRate value (assuming only one row is returned)
+          const tgtRate =
+            tgtRateData.length > 0 ? tgtRateData[0].TgtRate : null;
+
+          // Create a map of NcTaskId to MachineTime
+          const machineTimeMap = {};
+          data1.forEach((row) => {
+            machineTimeMap[row.NcTaskId] = row.MachineTime;
+          });
+
+          // Calculate HourRate, TargetHourRate, and add TgtRate for each row in data
+          data.forEach((row) => {
+            const machineTime = machineTimeMap[row.NcTaskId];
+
+            if (machineTime !== undefined) {
+              row.MachineTime = machineTime;
+              row.HourRate = row.JWValue / machineTime;
+              row.TargetHourRate = row.MaterialValue / machineTime;
+              row.TgtRate = tgtRate !== null ? tgtRate : "N/A"; // Added here
+            } else {
+              row.MachineTime = "Not Processed";
+              row.HourRate = "Not Invoiced";
+              row.TargetHourRate = "Not Invoiced";
+              row.TgtRate = tgtRate !== null ? tgtRate : "N/A"; // Added here
+            }
+          });
+
+          res.send(data); // Send the resulting data array as response
+        });
       });
     });
   } catch (error) {
