@@ -137,7 +137,7 @@ ScheduleListRouter.post(`/getFormDeatils`, async (req, res, next) => {
 ScheduleListRouter.post(`/save`, async (req, res, next) => {
   // Constructing the first query to update orderscheduledetails table
 
-  //   console.log("req.body.formdata", req.body.formdata);
+  console.log("req.body.newState", req.body.newState);
 
   let query = `UPDATE magodmis.orderscheduledetails o,
     (SELECT CASE
@@ -469,89 +469,199 @@ ScheduleListRouter.post(`/taskOnclick`, async (req, res, next) => {
 });
 
 //Onclick of Button Cancel
+// ScheduleListRouter.post(`/onClickCancel`, async (req, res, next) => {
+
+//   console.log('Hello cancel');
+
+//   try {
+//     let query = `SELECT * FROM magodmis.orderscheduledetails WHERE SchDetailsID='${req.body.newState[0].SchDetailsID}';`;
+
+//     misQueryMod(query, (err, data) => {
+//       if (err) {
+//         console.error("Database error:", err);
+//         return res.status(500).json({ error: "Internal Server Error" });
+//       } else {
+//         if (data && data.length > 0) {
+//           const resultQuery = data[0]; // Assuming only one row is returned
+
+//           console.log("Inside if", resultQuery);
+
+//           const QtyProgrammed = resultQuery.QtyProgrammed;
+
+//           console.log("QtyProgrammedmmmm", QtyProgrammed);
+
+//           if (QtyProgrammed > 0) {
+//             // Execute the update queries
+//             const updateQuery1 = `UPDATE magodmis.orderscheduledetails o SET o.QtyScheduled=0 WHERE o.SchDetailsID=${resultQuery.SchDetailsID};`;
+//             const updateQuery2 = `UPDATE order_details o SET o.QtyScheduled=o.QtyScheduled-${resultQuery.QtyScheduled} WHERE o.OrderDetailID=${resultQuery.OrderDetailID};`;
+//             const updateQuery3 = `UPDATE orderschedule SET Schedule_Status='Cancelled' WHERE ScheduleId=${req.body.newState[0].ScheduleId};`;
+//             // const deleteQuery = `DELETE magodmis.t, magodmis.n FROM magodmis.nc_task_list AS n, magodmis.task_partslist AS t WHERE n.ScheduleID='${req.body.newState[0].ScheduleId}' AND t.NcTaskId=n.NcTaskId;`;
+//             const deleteQuery = `DELETE n, t FROM magodmis.nc_task_list AS n JOIN magodmis.task_partslist AS t ON t.NcTaskId = n.NcTaskId
+//                                  WHERE n.ScheduleID = '${req.body.newState[0].ScheduleId}';`;
+
+//             misQueryMod(updateQuery1, (err, result1) => {
+//               if (err) {
+//                 console.error("Database error:", err);
+//                 return res.status(500).json({ error: "Internal Server Error" });
+//               } else {
+//                 misQueryMod(updateQuery2, (err, result2) => {
+//                   if (err) {
+//                     console.error("Database error:", err);
+//                     return res
+//                       .status(500)
+//                       .json({ error: "Internal Server Error" });
+//                   } else {
+//                     misQueryMod(updateQuery3, (err, result3) => {
+//                       if (err) {
+//                         console.error("Database error:", err);
+//                         return res
+//                           .status(500)
+//                           .json({ error: "Internal Server Error" });
+//                       } else {
+//                         misQueryMod(deleteQuery, (err, result4) => {
+//                           if (err) {
+//                             console.error("Database error:", err);
+//                             return res
+//                               .status(500)
+//                               .json({ error: "Internal Server Error" });
+//                           } else {
+//                             return res.status(200).json({
+//                               message: "Schedules cancelled successfully",
+//                             });
+//                           }
+//                         });
+//                       }
+//                     });
+//                   }
+//                 });
+//               }
+//             });
+//           } else {
+//             return res
+//               .status(400)
+//               .json({ message: "Cannot Cancel Schedules Once Programmed" });
+//           }
+//         } else {
+//           return res
+//             .status(404)
+//             .json({ error: "No data found for the given SchDetailsID" });
+//         }
+//       }
+//     });
+//   } catch (error) {
+//     console.error("Server error:", error);
+//     return res.status(500).json({ error: "Internal Server Error" });
+//   }
+// });
+
 ScheduleListRouter.post(`/onClickCancel`, async (req, res, next) => {
+  // console.log("Received request for onClickCancel");
+  // console.log("Request Body:", JSON.stringify(req.body, null, 2));
+
   try {
-    let query = `SELECT * FROM magodmis.orderscheduledetails WHERE SchDetailsID='${req.body.newState[0].SchDetailsID}';`;
+    if (
+      !req.body.newState ||
+      !Array.isArray(req.body.newState) ||
+      req.body.newState.length === 0
+    ) {
+      console.error("Invalid request: newState is missing or empty");
+      return res
+        .status(400)
+        .json({ error: "Invalid request: newState is required" });
+    }
+
+    const schDetailsID = req.body.newState[0]?.SchDetailsID;
+    const scheduleId = req.body.newState[0]?.ScheduleId;
+
+    console.log("SchDetailsID:", schDetailsID);
+    console.log("ScheduleId:", scheduleId);
+
+    if (!schDetailsID) {
+      console.error(" Missing SchDetailsID in request");
+      return res.status(400).json({ error: "SchDetailsID is required" });
+    }
+
+    if (!scheduleId) {
+      console.error("Missing ScheduleId in request");
+      return res.status(400).json({ error: "ScheduleId is required" });
+    }
+
+    let query = `SELECT * FROM magodmis.orderscheduledetails WHERE SchDetailsID='${schDetailsID}';`;
 
     misQueryMod(query, (err, data) => {
       if (err) {
         console.error("Database error:", err);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res
+          .status(500)
+          .json({ error: "Internal Server Error", details: err.message });
       } else {
-        if (data && data.length > 0) {
-          const resultQuery = data[0]; // Assuming only one row is returned
-
-          console.log("Inside if", resultQuery);
-
-          const QtyProgrammed = resultQuery.QtyProgrammed;
-
-          console.log("QtyProgrammedmmmm", QtyProgrammed);
-
-          if (QtyProgrammed > 0) {
-            // Execute the update queries
-            const updateQuery1 = `UPDATE magodmis.orderscheduledetails o SET o.QtyScheduled=0 WHERE o.SchDetailsID=${resultQuery.SchDetailsID};`;
-            const updateQuery2 = `UPDATE order_details o SET o.QtyScheduled=o.QtyScheduled-${resultQuery.QtyScheduled} WHERE o.OrderDetailID=${resultQuery.OrderDetailID};`;
-            const updateQuery3 = `UPDATE orderschedule SET Schedule_Status='Cancelled' WHERE ScheduleId=${req.body.newState[0].ScheduleId};`;
-            // const deleteQuery = `DELETE magodmis.t, magodmis.n FROM magodmis.nc_task_list AS n, magodmis.task_partslist AS t WHERE n.ScheduleID='${req.body.newState[0].ScheduleId}' AND t.NcTaskId=n.NcTaskId;`;
-            const deleteQuery = `DELETE n, t FROM magodmis.nc_task_list AS n JOIN magodmis.task_partslist AS t ON t.NcTaskId = n.NcTaskId 
-                                 WHERE n.ScheduleID = '${req.body.newState[0].ScheduleId}';`;
-
-            misQueryMod(updateQuery1, (err, result1) => {
-              if (err) {
-                console.error("Database error:", err);
-                return res.status(500).json({ error: "Internal Server Error" });
-              } else {
-                misQueryMod(updateQuery2, (err, result2) => {
-                  if (err) {
-                    console.error("Database error:", err);
-                    return res
-                      .status(500)
-                      .json({ error: "Internal Server Error" });
-                  } else {
-                    misQueryMod(updateQuery3, (err, result3) => {
-                      if (err) {
-                        console.error("Database error:", err);
-                        return res
-                          .status(500)
-                          .json({ error: "Internal Server Error" });
-                      } else {
-                        misQueryMod(deleteQuery, (err, result4) => {
-                          if (err) {
-                            console.error("Database error:", err);
-                            return res
-                              .status(500)
-                              .json({ error: "Internal Server Error" });
-                          } else {
-                            return res.status(200).json({
-                              message: "Schedules cancelled successfully",
-                            });
-                          }
-                        });
-                      }
-                    });
-                  }
-                });
-              }
-            });
-          } else {
-            return res
-              .status(400)
-              .json({ message: "Cannot Cancel Schedules Once Programmed" });
-          }
-        } else {
+        console.log("📊 Database Query Result:", data);
+        if (!data || data.length === 0) {
+          console.error("No data found for SchDetailsID:", schDetailsID);
           return res
             .status(404)
             .json({ error: "No data found for the given SchDetailsID" });
+        }
+
+        const resultQuery = data[0];
+        const QtyProgrammed = Number(resultQuery.QtyProgrammed);
+
+        console.log("🛠️ QtyProgrammed:", QtyProgrammed);
+
+        if (QtyProgrammed > 0) {
+          return res
+            .status(400)
+            .json({ message: "Cannot Cancel: Schedule is already programmed" });
+        } else {
+          console.log("Proceeding with cancellation...");
+
+          const updateQuery1 = `UPDATE magodmis.orderscheduledetails o SET o.QtyScheduled=0 WHERE o.SchDetailsID=${resultQuery.SchDetailsID};`;
+          const updateQuery2 = `UPDATE order_details o SET o.QtyScheduled=o.QtyScheduled-${resultQuery.QtyScheduled} WHERE o.OrderDetailID=${resultQuery.OrderDetailID};`;
+          const updateQuery3 = `UPDATE orderschedule SET Schedule_Status='Cancelled' WHERE ScheduleId=${req.body.newState[0].ScheduleId};`;
+          const deleteQuery = `DELETE n, t FROM magodmis.nc_task_list AS n JOIN magodmis.task_partslist AS t ON t.NcTaskId = n.NcTaskId 
+                               WHERE n.ScheduleID = '${req.body.newState[0].ScheduleId}';`;
+
+          misQueryMod(updateQuery1, (err, result1) => {
+            if (err)
+              return res.status(500).json({ error: "Internal Server Error" });
+
+            misQueryMod(updateQuery2, (err, result2) => {
+              if (err)
+                return res.status(500).json({ error: "Internal Server Error" });
+
+              misQueryMod(updateQuery3, (err, result3) => {
+                if (err)
+                  return res
+                    .status(500)
+                    .json({ error: "Internal Server Error" });
+
+                misQueryMod(deleteQuery, (err, result4) => {
+                  if (err)
+                    return res
+                      .status(500)
+                      .json({ error: "Internal Server Error" });
+
+                  return res
+                    .status(200)
+                    .json({ message: "Schedules cancelled successfully" });
+                });
+              });
+            });
+          });
         }
       }
     });
   } catch (error) {
     console.error("Server error:", error);
-    return res.status(500).json({ error: "Internal Server Error" });
+    return res
+      .status(500)
+      .json({ error: "Internal Server Error", details: error.message });
   }
 });
 
 ScheduleListRouter.post(`/ScheduleButton`, async (req, res, next) => {
+  console.log("req.body.formdata", req.body.formdata);
+
   try {
     let querySalesOverdue = `SELECT count(d.DC_Inv_No) AS SalesOverdueCount 
                              FROM magodmis.draft_dc_inv_register d
@@ -603,10 +713,25 @@ ScheduleListRouter.post(`/ScheduleButton`, async (req, res, next) => {
                         .status(500)
                         .json({ error: "Internal Server Error" });
                     } else {
+                      console.log(
+                        "Before hasZeroQtyScheduled",
+                        scheduleDetailsData
+                      );
+
                       const hasZeroQtyScheduled = scheduleDetailsData.some(
                         (row) => row.QtyScheduled === 0
                       );
+
+                      console.log(
+                        "After hasZeroQtyScheduled",
+                        hasZeroQtyScheduled
+                      );
+
                       if (hasZeroQtyScheduled) {
+                        console.log(
+                          "Inside hasZeroQtyScheduled",
+                          hasZeroQtyScheduled
+                        );
                         return res.status(200).json({
                           message: `Cannot Schedule Zero Quantity For ${scheduleDetailsData[0].DwgName}. Do you wish to delete it from the Schedule?`,
                           scheduleDetails: scheduleDetailsData,
@@ -1471,9 +1596,60 @@ ScheduleListRouter.get(`/getSalesContact`, async (req, res, next) => {
 });
 
 //OnClick of Performance
+// ScheduleListRouter.post(`/onClickPerformce`, async (req, res, next) => {
+//   console.log("formdata", req.body.TaskMaterialData[0].Machine);
+
+//   try {
+//     const scheduleId = req.body.formdata[0].ScheduleId;
+//     const machine = req.body.TaskMaterialData[0].Machine;
+
+//     // Execute the first query
+//     executeFirstQuery(scheduleId, (err, data) => {
+//       if (err) {
+//         console.log("err", err);
+//         return next(err); // Pass the error to the error handling middleware
+//       }
+//       // Execute the second query
+//       executeSecondQuery(scheduleId, (err, data1) => {
+//         if (err) {
+//           console.log("err", err);
+//           return next(err); // Pass the error to the error handling middleware
+//         }
+
+//         // Create a map of NcTaskId to MachineTime
+//         const machineTimeMap = {};
+//         data1.forEach((row) => {
+//           machineTimeMap[row.NcTaskId] = row.MachineTime;
+//         });
+
+//         // Calculate HourRate and TargetHourRate for each row in data
+//         data.forEach((row) => {
+//           const machineTime = machineTimeMap[row.NcTaskId];
+//           if (machineTime !== undefined) {
+//             row.MachineTime = machineTime;
+//             row.HourRate = row.JWValue / machineTime;
+//             row.TargetHourRate = row.MaterialValue / machineTime;
+//           } else {
+//             row.MachineTime = "Not Processed";
+//             row.HourRate = "Not Invoiced";
+//             row.TargetHourRate = "Not Invoiced";
+//           }
+//         });
+
+//         res.send(data); // Send the resulting data array as response
+//       });
+//     });
+//   } catch (error) {
+//     next(error); // Pass any uncaught errors to the error handling middleware
+//   }
+// });
+
 ScheduleListRouter.post(`/onClickPerformce`, async (req, res, next) => {
+  console.log("formdata", req.body.TaskMaterialData[0].Machine);
+
   try {
     const scheduleId = req.body.formdata[0].ScheduleId;
+    const machine = req.body.TaskMaterialData[0].Machine;
 
     // Execute the first query
     executeFirstQuery(scheduleId, (err, data) => {
@@ -1481,6 +1657,7 @@ ScheduleListRouter.post(`/onClickPerformce`, async (req, res, next) => {
         console.log("err", err);
         return next(err); // Pass the error to the error handling middleware
       }
+
       // Execute the second query
       executeSecondQuery(scheduleId, (err, data1) => {
         if (err) {
@@ -1488,27 +1665,43 @@ ScheduleListRouter.post(`/onClickPerformce`, async (req, res, next) => {
           return next(err); // Pass the error to the error handling middleware
         }
 
-        // Create a map of NcTaskId to MachineTime
-        const machineTimeMap = {};
-        data1.forEach((row) => {
-          machineTimeMap[row.NcTaskId] = row.MachineTime;
-        });
-
-        // Calculate HourRate and TargetHourRate for each row in data
-        data.forEach((row) => {
-          const machineTime = machineTimeMap[row.NcTaskId];
-          if (machineTime !== undefined) {
-            row.MachineTime = machineTime;
-            row.HourRate = row.JWValue / machineTime;
-            row.TargetHourRate = row.MaterialValue / machineTime;
-          } else {
-            row.MachineTime = "Not Processed";
-            row.HourRate = "Not Invoiced";
-            row.TargetHourRate = "Not Invoiced";
+        // Execute the third query to get TgtRate
+        const query = `SELECT TgtRate FROM machine_data.machine_list WHERE refName = '${machine}'`;
+        misQueryMod(query, (err, tgtRateData) => {
+          if (err) {
+            console.log("err", err);
+            return next(err); // Pass the error to the error handling middleware
           }
-        });
 
-        res.send(data); // Send the resulting data array as response
+          // Extract TgtRate value (assuming only one row is returned)
+          const tgtRate =
+            tgtRateData.length > 0 ? tgtRateData[0].TgtRate : null;
+
+          // Create a map of NcTaskId to MachineTime
+          const machineTimeMap = {};
+          data1.forEach((row) => {
+            machineTimeMap[row.NcTaskId] = row.MachineTime;
+          });
+
+          // Calculate HourRate, TargetHourRate, and add TgtRate for each row in data
+          data.forEach((row) => {
+            const machineTime = machineTimeMap[row.NcTaskId];
+
+            if (machineTime !== undefined) {
+              row.MachineTime = machineTime;
+              row.HourRate = row.JWValue / machineTime;
+              row.TargetHourRate = row.MaterialValue / machineTime;
+              row.TgtRate = tgtRate !== null ? tgtRate : "N/A"; // Added here
+            } else {
+              row.MachineTime = "Not Processed";
+              row.HourRate = "Not Invoiced";
+              row.TargetHourRate = "Not Invoiced";
+              row.TgtRate = tgtRate !== null ? tgtRate : "N/A"; // Added here
+            }
+          });
+
+          res.send(data); // Send the resulting data array as response
+        });
       });
     });
   } catch (error) {
