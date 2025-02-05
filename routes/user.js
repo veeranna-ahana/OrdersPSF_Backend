@@ -16,12 +16,11 @@ var jsonParser = bodyParser.json();
 
 userRouter.post(`/login`, async (req, res, next) => {
   try {
-    console.log("login");
+    // console.log("login");
     const username = req.body.username;
     const passwd = req.body.password;
 
     let passwrd = CryptoJS.SHA512(req.body.password);
-    console.log(passwrd);
     if (!username || !passwrd) res.send(createError.BadRequest());
 
     setupQueryMod(
@@ -34,7 +33,6 @@ userRouter.post(`/login`, async (req, res, next) => {
     );
     // res.status(401).send({ error: "Invalid username or password" });
         let data = d;
-        console.log("data", data);
         if (data.length > 0) {
           if (data[0]["Password"] == passwrd) {
             delete data[0]["Password"];
@@ -84,7 +82,6 @@ userRouter.post(`/login`, async (req, res, next) => {
 });
 
 userRouter.post(`/savemenurolemapping`, async (req, res, next) => {
-  console.log("Save Menu Role Mapping API Call");
 
   let sucs = false;
   let updt = false;
@@ -99,7 +96,7 @@ userRouter.post(`/savemenurolemapping`, async (req, res, next) => {
         async (err, dr) => {
           if (err) logger.error(err);
           inRole = dr["Role"];
-          console.log(inRole);
+          // console.log(inRole);
         }
       );
     }
@@ -135,7 +132,7 @@ userRouter.post(`/savemenurolemapping`, async (req, res, next) => {
                             async (err, ins) => {
                               if (err) logger.error(err);
                               msg = "success";
-                              console.log(msg);
+                              // console.log(msg);
                             }
                           );
                         }
@@ -148,10 +145,10 @@ userRouter.post(`/savemenurolemapping`, async (req, res, next) => {
           }
         );
       }
-      console.log(" update & insert " + msg);
+      // console.log(" update & insert " + msg);
       res.send({ status: msg });
     } else if (dr.length == 0) {
-      console.log("dr length = 0 ");
+      // console.log("dr length = 0 ");
       for (let i = 0; i < data.length; i++) {
         await setupQueryMod(
           `Select Id from magod_setup.menus where MenuName = '${data[i]["MenuName"]}'`,
@@ -169,7 +166,7 @@ userRouter.post(`/savemenurolemapping`, async (req, res, next) => {
           }
         );
       }
-      console.log("insert " + msg);
+      // console.log("insert " + msg);
       res.send({ status: msg });
     }
   } catch (error) {
@@ -179,7 +176,7 @@ userRouter.post(`/savemenurolemapping`, async (req, res, next) => {
 });
 
 userRouter.post(`/getusers`, async (req, res, next) => {
-  console.log("get users");
+  // console.log("get users");
   try {
     setupQueryMod(
       `Select usr.Name, usr.UserName,usr.Role, unt.UnitName from magod_setup.magod_userlist usr
@@ -196,7 +193,7 @@ userRouter.post(`/getusers`, async (req, res, next) => {
 });
 
 userRouter.post(`/delusers`, async (req, res, next) => {
-  console.log("Delete User");
+  // console.log("Delete User");
   try {
     let usrname = req.body.uname;
     setupQueryMod(
@@ -226,7 +223,7 @@ userRouter.post(`/delusers`, async (req, res, next) => {
 userRouter.post(`/saveusers`, async (req, res, next) => {
   try {
     let data = req.body.usrdata;
-    console.log(data);
+    // console.log(data);
     let passwrd = CryptoJS.SHA512(data.Password);
     let msg = "";
     setupQueryMod(
@@ -250,8 +247,8 @@ userRouter.post(`/saveusers`, async (req, res, next) => {
               );
           });
         } else {
-          console.log("Update");
-          console.log(data.Name);
+          // console.log("Update");
+          // console.log(data.Name);
           // let rspwd = data.ResetPassword == 1 ? 1 : 0;
           let sql = `Update magod_setup.magod_userlist set Name='${data.Name}',ActiveUser='1',ResetPassword='0'
                 ,UserPassWord='',Role='${data.Role}',Password='${passwrd}',UnitID='${data.Unit}' where UserName='${data.UserName}'`;
@@ -313,14 +310,14 @@ userRouter.post(`/getuserroles`, async (req, res, next) => {
 
 userRouter.post(`/adduserroles`, async (req, res, next) => {
   try {
-    console.log("adduserroles");
+    // console.log("adduserroles");
     const strrole = req.body.usrroledata.Role;
-    console.log(strrole);
+    // console.log(strrole);
     setupQueryMod(
       `Select * from magod_setup.userroles where Role ='${strrole}'`,
       async (err, datarole) => {
         if (err) logger.error(err);
-        console.log(datarole.length);
+        // console.log(datarole.length);
         if (datarole.length == 0) {
           setupQueryMod(
             `INSERT INTO magod_setup.userroles (Role) VALUES ('${strrole}')`,
@@ -353,10 +350,10 @@ userRouter.post(`/adduserroles`, async (req, res, next) => {
 });
 
 userRouter.post(`/deluserroles`, async (req, res, next) => {
-  console.log("Delete user Role");
+  // console.log("Delete user Role");
   try {
     let oldrole = req.body.rolenm;
-    console.log("Role : " + req.body.rolenm);
+    // console.log("Role : " + req.body.rolenm);
 
     // setupQuery(`Select * from magod_setup.menumapping where Role='${oldrole}'`,(mmdata) => {
     //     if(mmdata.length > 0){
@@ -372,7 +369,7 @@ userRouter.post(`/deluserroles`, async (req, res, next) => {
       `Delete from magod_setup.userroles where Role='${oldrole}'`,
       (err, data) => {
         if (err) logger.error(err);
-        console.log("Role Deleted");
+        // console.log("Role Deleted");
         res.send({ status: "Deleted" });
       }
     );
@@ -471,7 +468,7 @@ userRouter.post(`/delusermenus`, async (req, res, next) => {
 });
 
 userRouter.post(`/addusermenus`, async (req, res, next) => {
-  console.log("addusermenus");
+  // console.log("addusermenus");
 
   let msg = "";
   try {
@@ -497,7 +494,7 @@ userRouter.post(`/addusermenus`, async (req, res, next) => {
             setupQuery(
               `INSERT INTO magod_setup.menus (MenuName, MenuUrl,ActiveMenu) VALUES ('${strmenu}','${strurl}','1')`,
               async (data) => {
-                console.log("Inserting ");
+                // console.log("Inserting ");
                 //  res.send(data)
                 if (data.affectedRows > 0) {
                   setupQuery(
@@ -522,7 +519,7 @@ userRouter.post(`/addusermenus`, async (req, res, next) => {
 userRouter.post("/fetchMenuUrls", async (req, res, next) => {
   try {
     const { role, username } = req.body;
-    console.log("req.body", req.body);
+    // console.log("req.body", req.body);
     if (!role || !username) return res.send(createError.BadRequest());
 
     setupQueryMod(
@@ -571,11 +568,11 @@ userRouter.post("/openexplorer", (req, res) => {
     `powershell.exe Start-Process explorer.exe -ArgumentList "${testPath}"`,
     (err, stdout, stderr) => {
       if (err) {
-        console.error(`Error opening path: ${err.message}`);
-        console.error(`stderr: ${stderr}`);
+        // console.error(`Error opening path: ${err.message}`);
+        // console.error(`stderr: ${stderr}`);
         return res.status(500).send("Failed to open the path");
       }
-      console.log(`stdout: ${stdout}`);
+      // console.log(`stdout: ${stdout}`);
       res.send(`Opened path: ${testPath}`);
     }
   );

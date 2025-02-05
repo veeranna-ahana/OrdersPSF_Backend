@@ -28,7 +28,7 @@ customerRouter.post("/allcustcodename", async (req, res, next) => {
 			"Select Cust_Code,Cust_name from magodmis.cust_data   order by Cust_name asc",
 			(err, data) => {
 				if (err) logger.error(err);
-				console.log("data", data);
+				// console.log("data", data);
 				res.send(data);
 			}
 		);
@@ -69,9 +69,9 @@ customerRouter.post("/customer", async (req, res, next) => {
 			`Select * from magodmis.cust_data where lower(Cust_name)=Lower('${customerName}')`,
 			(err, result) => {
 				if (err) logger.error(err);
-				console.log(result);
+				// console.log(result);
 				if (result.length > 0) {
-					console.log("Customer Already Exists.." + customerName);
+					// console.log("Customer Already Exists.." + customerName);
 					misQueryMod(
 						"Update magodmis.cust_data set IsBranch='" +
 							isBranch +
@@ -88,7 +88,7 @@ customerRouter.post("/customer", async (req, res, next) => {
 						}
 					);
 				} else {
-					console.log("New Customer..");
+					// console.log("New Customer..");
 					setupQuery(
 						"SELECT *  FROM magod_setup.magod_runningno WHERE SrlType='CustCode' ORDER BY Id DESC LIMIT 1;",
 						async (runningno) => {
@@ -98,7 +98,7 @@ customerRouter.post("/customer", async (req, res, next) => {
 							let qno = (parseInt(runningno[0]["Running_No"]) + 1)
 								.toString()
 								.padStart(4, "0");
-							console.log(qno);
+							// console.log(qno);
 							createFolder("Customer", qno, month, (err, fres) => {
 								if (err) logger.error(err);
 							});
@@ -107,14 +107,14 @@ customerRouter.post("/customer", async (req, res, next) => {
 								`Insert into magodmis.cust_data (Cust_Code,IsBranch,Cust_name,Branch) values ('${qno}', '${isBranch}','${customerName}','${branchName}')`,
 								(err, ins) => {
 									if (err) logger.error(err);
-									console.log(ins);
+									// console.log(ins);
 									if (ins && ins.affectedRows > 0) {
 										setupQuery(
 											`UPDATE magod_setup.magod_runningno SET Running_No = Running_No + 1 WHERE SrlType='CustCode' And Id = ${runningno[0]["Id"]}`,
 											async (updatedrunning) => {
-												console.log(
-													`Updated running No ${JSON.stringify(updatedrunning)}`
-												);
+												// console.log(
+												// 	`Updated running No ${JSON.stringify(updatedrunning)}`
+												// );
 												res.send({ status: "success", custcode: qno });
 											}
 										);
@@ -132,11 +132,11 @@ customerRouter.post("/customer", async (req, res, next) => {
 });
 
 customerRouter.post(`/customerupdate`, async (req, res, next) => {
-	console.log("customerupdate - Yes");
+	// console.log("customerupdate - Yes");
 	try {
 		let msg = "";
 		const custcode = req.body.custcode;
-		console.log("Check on Cust code : " + custcode);
+		// console.log("Check on Cust code : " + custcode);
 		const custaddress = req.body.custAddress;
 		const branchname = req.body.branchName;
 		const custcity = req.body.city;
@@ -159,16 +159,16 @@ customerRouter.post(`/customerupdate`, async (req, res, next) => {
 		const govtorg = req.body.govtorg;
 		const isexport = req.body.isexport;
 		const foldername = req.body.custfoldername;
-		console.log(req.body.custcurent);
+		// console.log(req.body.custcurent);
 		const ccurrent = req.body.custcurent ? 1 : 0;
-		console.log(ccurrent);
+		// console.log(ccurrent);
 		const delivery = req.body.delivery;
 
 		const contactdetails = req.body.custContactData;
 
-		console.log(
-			"cont details from req : " + JSON.stringify(req.body.custContactData)
-		);
+		// console.log(
+		// 	"cont details from req : " + JSON.stringify(req.body.custContactData)
+		// );
 		//  const contacttelenos = req.body.custContTeleData;
 
 		//   console.log("customerupdate T - Yes1 " + req.body.contacttelenos.length)
@@ -177,7 +177,7 @@ customerRouter.post(`/customerupdate`, async (req, res, next) => {
 		if (govtorg == 1) {
 			gstexempt = 1;
 		}
-		console.log("contact details : " + contactdetails);
+		// console.log("contact details : " + contactdetails);
 		//   if (!custcode) res.send(createError.BadRequest())
 		misQuery(
 			"Select * from magodmis.cust_data where Cust_Code = '" + custcode + "'",
@@ -196,9 +196,9 @@ customerRouter.post(`/customerupdate`, async (req, res, next) => {
 							// Contact Loop
 							// console.log("Contact Loop : " + contactdetails);  // JSON.stringify(contactdetails))
 							for (let i = 0; i < contactdetails.length; i++) {
-								console.log(
-									"inside For loop " + JSON.stringify(contactdetails)
-								);
+								// console.log(
+								// 	"inside For loop " + JSON.stringify(contactdetails)
+								// );
 								// if (contactdetails[i]["conName"] === "") {
 								//     break;
 								// }
@@ -212,7 +212,7 @@ customerRouter.post(`/customerupdate`, async (req, res, next) => {
 									`Select * from magodmis.cust_contacts where Name = '${contactdetails[i].conName}' and Cust_code ='${custcode}'`,
 									(err, contdata) => {
 										if (err) logger.error(err);
-										console.log(" contact exists " + contdata.length);
+										// console.log(" contact exists " + contdata.length);
 										if (contdata.length > 0) {
 											misQueryMod(
 												`Update magodmis.cust_contacts set Designation = '${contactdetails[i].conDesignation}',E_mail ='${contactdetails[i].conE_mail}',
@@ -220,12 +220,12 @@ customerRouter.post(`/customerupdate`, async (req, res, next) => {
                                                 where Cust_code='${custcode}' and Name = '${contactdetails[i]["conName"]}'`,
 												async (err, updata) => {
 													if (err) logger.error(err);
-													console.log("contacts updated ");
+													// console.log("contacts updated ");
 												}
 											);
 										} else {
-											console.log("inserting contacts ");
-											console.log("Cust Code : " + req.body.custcode);
+											// console.log("inserting contacts ");
+											// console.log("Cust Code : " + req.body.custcode);
 											misQueryMod(
 												"insert into magodmis.cust_contacts (Cust_code,Name,Designation,E_mail,Dept,Tele_Office,Tele_Mobile)" +
 													" values('" +
@@ -303,16 +303,16 @@ customerRouter.post(`/customerupdate`, async (req, res, next) => {
 });
 
 customerRouter.post("/getcustomercontactdets", async (req, res, next) => {
-	console.log("get contact dets");
+	// console.log("get contact dets");
 	try {
 		let custid = req.body.custcode;
-		console.log("customer code : " + custid);
+		// console.log("customer code : " + custid);
 		misQueryMod(
 			`Select ContactID, Name as conName, Designation as conDesignation, Dept as conDept, E_mail as conE_mail,Tele_Office as conTele_Office,
                     Tele_Mobile as conTele_Mobile from magodmis.cust_contacts where Cust_Code='${custid}'`,
 			(err, data) => {
 				if (err) logger.error(err);
-				console.log(data);
+				// console.log(data);
 				res.send(data);
 			}
 		);
@@ -375,7 +375,7 @@ customerRouter.post(`/customerassy`, async (req, res, next) => {
 
 // Inserting Customer Assembly data
 customerRouter.post("/customerinsassembly", async (req, res, next) => {
-	console.log("Customer Assembly Insertion");
+	// console.log("Customer Assembly Insertion");
 	try {
 		const custcode = req.body.custcode;
 		const assycustpartid = req.body.partid;
@@ -387,7 +387,7 @@ customerRouter.post("/customerinsassembly", async (req, res, next) => {
 		const jwcost =
 			req.body.jwcost == null || req.body.jwcost == "" ? 0 : req.body.jwcost;
 		const assystatus = "Edit"; // req.body.assystatus;
-		console.log(req.body);
+		// console.log(req.body);
 
 		setupQuery(
 			"SELECT *  FROM magod_setup.magod_runningno WHERE SrlType='Cust_AssyList' ORDER BY Id DESC LIMIT 1;",
@@ -397,20 +397,20 @@ customerRouter.post("/customerinsassembly", async (req, res, next) => {
 					(parseInt(runningno[0]["Running_No"]) + 1)
 						.toString()
 						.padStart(6, "0");
-				console.log(magodassmid);
+				// console.log(magodassmid);
 
 				await misQueryMod(
 					`INSERT INTO magodmis.cust_assy_data ( Cust_code,MagodCode, AssyCust_PartId, AssyDescription,MtrlCost,JobWorkCost,Status) VALUES('${custcode}','${magodassmid}', '${assycustpartid}', '${assydescription}',${mtrlcost},${jwcost},'${assystatus}')`,
 					(err, ins) => {
 						if (err) logger.error(err);
-						console.log(ins);
+						// console.log(ins);
 						if (ins.affectedRows == 1) {
 							setupQuery(
 								`UPDATE magod_setup.magod_runningno SET Running_No = Running_No + 1 WHERE SrlType='Cust_AssyList' And Id = ${runningno[0]["Id"]}`,
 								async (updatedrunning) => {
-									console.log(
-										`Updated running No ${JSON.stringify(updatedrunning)}`
-									);
+									// console.log(
+									// 	`Updated running No ${JSON.stringify(updatedrunning)}`
+									// );
 								}
 							);
 						}
@@ -425,7 +425,7 @@ customerRouter.post("/customerinsassembly", async (req, res, next) => {
 });
 // Checking Duplicate Customer Assembly data
 customerRouter.post("/chkassydupl", async (req, res, next) => {
-	console.log("Checking Duplicate Customer Assembly data");
+	// console.log("Checking Duplicate Customer Assembly data");
 	try {
 		const custcode = req.body.custcode;
 		const assycustpartid = req.body.partid;
@@ -434,7 +434,7 @@ customerRouter.post("/chkassydupl", async (req, res, next) => {
 			`SELECT * FROM magodmis.cust_assy_data where Cust_code = '${custcode}' and AssyCust_PartId = '${assycustpartid}'`,
 			(err, data) => {
 				if (err) logger.error(err);
-				console.log(data);
+				// console.log(data);
 				if (data.length > 0) {
 					res.send({ status: "Duplicate" });
 				} else {
@@ -449,13 +449,13 @@ customerRouter.post("/chkassydupl", async (req, res, next) => {
 
 // Inserting Customer BOM PArts data
 customerRouter.post("/custbomparts", async (req, res, next) => {
-	console.log("Customer BOM Parts Insertion");
+	// console.log("Customer BOM Parts Insertion");
 	try {
 		const custcode = req.body.custcode;
 		const partid = req.body.partid;
 		const partdescription = req.body.partdescription;
 
-		console.log(req.body);
+		// console.log(req.body);
 
 		if (!custcode || !partid || !partdescription)
 			res.send(createError.BadRequest());
@@ -471,20 +471,20 @@ customerRouter.post("/custbomparts", async (req, res, next) => {
 								(parseInt(runningno[0]["Running_No"]) + 1)
 									.toString()
 									.padStart(10, "0");
-							console.log(magodpartid);
+							// console.log(magodpartid);
 
 							misQueryMod(
 								`INSERT INTO magodmis.cust_bomlist ( MagodPartId, Cust_code,PartId, PartDescription) VALUES('${magodpartid}', '${custcode}','${partid}', '${partdescription}')`,
 								(err, ins) => {
 									if (err) logger.error(err);
-									console.log(ins);
+									// console.log(ins);
 									if (ins.affectedRows == 1) {
 										setupQuery(
 											`UPDATE magod_setup.magod_runningno SET Running_No = Running_No + 1 WHERE SrlType='BOMList' And Id = ${runningno[0]["Id"]}`,
 											async (updatedrunning) => {
-												console.log(
-													`Updated running No ${JSON.stringify(updatedrunning)}`
-												);
+												// console.log(
+												// 	`Updated running No ${JSON.stringify(updatedrunning)}`
+												// );
 											}
 										);
 
@@ -512,7 +512,7 @@ customerRouter.post("/custbomparts", async (req, res, next) => {
 });
 
 customerRouter.post("/getcustomercontactdets", async (req, res, next) => {
-	console.log("Existing Customer Contact");
+	// console.log("Existing Customer Contact");
 	try {
 		const { custcode } = req.body.custcode;
 		misQueryMod(
@@ -541,7 +541,7 @@ customerRouter.post("/getcustomercontactdets", async (req, res, next) => {
 
 // sending data to Customer Part Receipt
 customerRouter.post(`/getcustomerbomparts`, async (req, res, next) => {
-	console.log("getcustomerbomparts");
+	// console.log("getcustomerbomparts");
 	try {
 		const ccode = req.body.custcode;
 		console.log(ccode);
@@ -549,7 +549,7 @@ customerRouter.post(`/getcustomerbomparts`, async (req, res, next) => {
 			`SELECT * FROM magodmis.cust_bomlist where Cust_code ='${ccode}'`,
 			(err, data) => {
 				if (err) logger.error(err);
-				console.log(data);
+				// console.log(data);
 				res.send(data);
 			}
 		);
@@ -560,13 +560,13 @@ customerRouter.post(`/getcustomerbomparts`, async (req, res, next) => {
 
 // Bom Assembly Parts
 customerRouter.post("/bomassemblyparts", async (req, res) => {
-	console.log("Bom Assembly Parts");
+	// console.log("Bom Assembly Parts");
 	try {
 		const ccode = req.body.custcode;
 		const dataarray = req.body.dataarray;
-		console.log(" Customer Code : " + ccode);
+		// console.log(" Customer Code : " + ccode);
 		let retdata = [];
-		console.log("bom assm parts : " + dataarray.length);
+		// console.log("bom assm parts : " + dataarray.length);
 		for (let i = 0; i < dataarray.length; i++) {
 			const { assyPartId, partid, partdesc, qty } = dataarray[i];
 			//   console.log(dataarray[i]);
@@ -575,9 +575,9 @@ customerRouter.post("/bomassemblyparts", async (req, res) => {
 				dataarray[i].partid != "" &&
 				dataarray[i].partid != null
 			) {
-				console.log(
-					"Saving Assm Parts : " + dataarray[i].partid + "  cust : " + ccode
-				);
+				// console.log(
+				// 	"Saving Assm Parts : " + dataarray[i].partid + "  cust : " + ccode
+				// );
 				misQueryMod(
 					`Insert into magodmis.cust_assy_bom_list (Cust_AssyId, Cust_BOM_ListId, Quantity)
             Values(
@@ -622,7 +622,7 @@ customerRouter.post("/custbomassemblyparts", async (req, res, next) => {
 	try {
 		const custcode = req.body.custcode;
 		const assyId = req.body.custassyid;
-		console.log(req.body.custassyid);
+		// console.log(req.body.custassyid);
 
 		misQueryMod(
 			`SELECT asm.AssyCust_PartId as assyPartId, bom.PartId as partid,bom.PartDescription as partdesc,asmbom.Quantity as qty from magodmis.cust_assy_data asm
@@ -685,17 +685,17 @@ customerRouter.post(`/customersdrawings`, async (req, res, next) => {
 
 // geting customer Order data
 customerRouter.post(`/customerorders`, async (req, res, next) => {
-	console.log("customerorders");
+	// console.log("customerorders");
 	try {
 		const custcode = req.body.custcode;
 		const ordstatus = req.body.orderstatus;
 		const ordtype = req.body.otype;
 		const ordertype = req.body.ordertype;
 
-		console.log(custcode);
-		console.log(ordstatus);
-		console.log(ordtype);
-		console.log(ordertype);
+		// console.log(custcode);
+		// console.log(ordstatus);
+		// console.log(ordtype);
+		// console.log(ordertype);
 		if (!custcode) res.send(createError.BadRequest());
 		if (ordtype == null) {
 			if (ordstatus !== "All") {
@@ -706,7 +706,7 @@ customerRouter.post(`/customerorders`, async (req, res, next) => {
 					(err, data) => {
 						if (err) logger.error(err);
 						//And Order_Type='${ordertype}'
-						console.log(data);
+						// console.log(data);
 						res.send(data);
 					}
 				);
@@ -717,7 +717,7 @@ customerRouter.post(`/customerorders`, async (req, res, next) => {
                 WHERE o.Cust_Code='${custcode}' ORDER BY o.Order_Date Desc`,
 					(err, data) => {
 						if (err) logger.error(err);
-						console.log(data);
+						// console.log(data);
 						res.send(data);
 					}
 				);
@@ -730,7 +730,7 @@ customerRouter.post(`/customerorders`, async (req, res, next) => {
                 WHERE o.Cust_Code='${custcode}' AND  Order_Status ='${ordstatus}' and Type='${ordtype}' And Order_Type='${ordertype}'  ORDER BY o.Order_Date Desc`,
 					(err, data) => {
 						if (err) logger.error(err);
-						console.log(data);
+						// console.log(data);
 						res.send(data);
 					}
 				);
@@ -741,7 +741,7 @@ customerRouter.post(`/customerorders`, async (req, res, next) => {
                 WHERE o.Cust_Code='${custcode}'  ORDER BY o.Order_Date Desc`,
 					(err, data) => {
 						if (err) logger.error(err);
-						console.log(data);
+						// console.log(data);
 						res.send(data);
 					}
 				);
@@ -769,7 +769,7 @@ customerRouter.post(`/orderstatus`, async (req, res, next) => {
 
 // geting customer Order Schedule data
 customerRouter.post(`/orderschedule`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const orderno = req.body.orderno;
 
@@ -787,7 +787,7 @@ customerRouter.post(`/orderschedule`, async (req, res, next) => {
 
 // geting customer Order Schedule Tasks data
 customerRouter.post(`/orderschtasks`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const orderno = req.body.orderno;
 		const ordschid = req.body.ordschid;
@@ -807,7 +807,7 @@ customerRouter.post(`/orderschtasks`, async (req, res, next) => {
 
 // geting customer Order Details data
 customerRouter.post(`/orderdetails`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const orderno = req.body.orderno;
 		misQueryMod(
@@ -824,14 +824,14 @@ customerRouter.post(`/orderdetails`, async (req, res, next) => {
 // getting Customer ORder Invoice data
 customerRouter.post(`/orderinvoices`, async (req, res, next) => {
 	try {
-		console.log(req.body);
+		// console.log(req.body);
 		const orderno = req.body.orderno;
 		misQueryMod(
 			`SELECT n.* FROM magodmis.draft_dc_inv_register n, magodmis.orderschedule o 
         WHERE n.ScheduleID=o.ScheduleID AND o.Order_No ='${orderno}'`,
 			(err, data) => {
 				if (err) logger.error(err);
-				console.log(data);
+				// console.log(data);
 				res.send(data);
 			}
 		);
@@ -841,15 +841,15 @@ customerRouter.post(`/orderinvoices`, async (req, res, next) => {
 });
 
 customerRouter.post(`/orderinvdwg`, async (req, res, next) => {
-	console.log(req.body);
-	console.log("Order Invoices DWG");
+	// console.log(req.body);
+	// console.log("Order Invoices DWG");
 	try {
 		const dcinvno = req.body.dcinvno;
 		misQueryMod(
 			`SELECT * FROM magodmis.draft_dc_inv_details d WHERE d.DC_Inv_No= '${dcinvno}'`,
 			(err, data) => {
 				if (err) logger.error(err);
-				console.log(data);
+				// console.log(data);
 				res.send(data);
 			}
 		);
@@ -858,7 +858,7 @@ customerRouter.post(`/orderinvdwg`, async (req, res, next) => {
 	}
 });
 customerRouter.post(`/schdets`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 
 	try {
 		const scheduleid = req.body.ordschid;
@@ -866,7 +866,7 @@ customerRouter.post(`/schdets`, async (req, res, next) => {
 			`SELECT n.* FROM magodmis.orderscheduledetails n WHERE n.ScheduleID='${scheduleid}'`,
 			(err, data) => {
 				if (err) logger.error(err);
-				console.log(data);
+				// console.log(data);
 				res.send(data);
 			}
 		);
@@ -891,7 +891,7 @@ customerRouter.post(`/schtasksdets`, async (req, res, next) => {
 });
 
 customerRouter.post(`/printduereport`, async (req, res, next) => {
-	console.log("Print Due Report ");
+	// console.log("Print Due Report ");
 	try {
 		const custcode = req.body.custcode;
 		// const DueAmt = req.body.dueAmount;
@@ -910,7 +910,7 @@ customerRouter.post(`/printduereport`, async (req, res, next) => {
         and d.GrandTotal > d.PymtAmtRecd ) a`,
 			(err, duestypedata) => {
 				if (err) logger.error(err);
-				console.log(" dues data " + JSON.stringify(duestypedata));
+				// console.log(" dues data " + JSON.stringify(duestypedata));
 
 				misQueryMod(
 					`SELECT DateDiff(Curdate(),d.Inv_Date) as DueDays,DC_Inv_No,IsDC,DATE_FORMAT(Dc_inv_Date, "%d/%l/%Y") AS 'Dc_inv_Date' ,DC_InvType,
@@ -921,10 +921,10 @@ customerRouter.post(`/printduereport`, async (req, res, next) => {
                 WHERE  d.DCStatus='Despatched' AND d.Cust_Code='${custcode}' ORDER BY d.Inv_Date`,
 					(err, duedata) => {
 						if (err) logger.error(err);
-						console.log("due data " + duedata);
+						// console.log("due data " + duedata);
 						sendDueList(custdata, duestypedata, duedata, (err, data) => {
 							if (err) logger.error(err);
-							console.log(data);
+							// console.log(data);
 						});
 					}
 				);
@@ -962,7 +962,7 @@ customerRouter.post(`/getmtrlrvlist`, async (req, res, next) => {
 		const status = req.body.Status;
 		const source = req.body.Source;
 		const ccode = req.body.custcode;
-		console.log(type, status, source);
+		// console.log(type, status, source);
 
 		if (!type || !status || !source) return res.send(createError.BadRequest());
 		if (ccode == "") {
@@ -1071,7 +1071,7 @@ customerRouter.post(`/customermtrlpartsreturned`, async (req, res, next) => {
 });
 
 customerRouter.post(`/updatebomassembly`, async (req, res, next) => {
-	console.log("Update Assm details");
+	// console.log("Update Assm details");
 	try {
 		const mmagodid = req.body.mmagodid;
 		const asmstatus = req.body.assmstatus;
@@ -1099,7 +1099,7 @@ customerRouter.post(`/updatebomassembly`, async (req, res, next) => {
 });
 
 customerRouter.post(`/deletebomassmparts`, async (req, res, next) => {
-	console.log("Deleting Parts ");
+	// console.log("Deleting Parts ");
 	try {
 		const asmid = req.body.assmid;
 		const asmpart = req.body.assmpartid;
@@ -1107,14 +1107,14 @@ customerRouter.post(`/deletebomassmparts`, async (req, res, next) => {
 			`Select assytbl.Id as assyid from magodmis.cust_assy_data assytbl where AssyCust_PartId = '${asmid}'`,
 			(err, asmdata) => {
 				if (err) logger.error(err);
-				console.log(asmdata);
-				console.log(asmdata[0].assyid);
-				console.log(asmpart);
+				// console.log(asmdata);
+				// console.log(asmdata[0].assyid);
+				// console.log(asmpart);
 				misQueryMod(
 					`SELECT bomlist.Id FROM magodmis.cust_bomlist as bomlist where PartId = '${asmpart}'`,
 					(err, asmprtdata) => {
 						if (err) logger.error(err);
-						console.log("asmprtdata " + asmprtdata[0].Id);
+						// console.log("asmprtdata " + asmprtdata[0].Id);
 						misQueryMod(
 							`Delete from magodmis.cust_assy_bom_list  where Cust_AssyId ='${asmdata[0].assyid}' and Cust_Bom_ListId='${asmprtdata[0].Id}'`,
 							(err, deldata) => {
@@ -1134,7 +1134,7 @@ customerRouter.post(`/deletebomassmparts`, async (req, res, next) => {
 customerRouter.post(
 	`/customermtrlscrapUnusedreturned`,
 	async (req, res, next) => {
-		console.log("Scrap mtrl");
+		// console.log("Scrap mtrl");
 		try {
 			const custcode = req.body.custcode;
 			if (!custcode) return res.send(createError.BadRequest());
@@ -1158,7 +1158,7 @@ customerRouter.post(
 
 // Customer Invoice and Payment Receipts data
 customerRouter.post(`/customerduelist`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const custcode = req.body.custcode;
 		if (!custcode) return res.send(createError.BadRequest());
@@ -1185,7 +1185,7 @@ customerRouter.post(`/customerduelist`, async (req, res, next) => {
 });
 
 customerRouter.post(`/customeroverduelist`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const custcode = req.body.custcode;
 		const custcr = req.body.crdays;
@@ -1232,7 +1232,7 @@ customerRouter.post(`/customerduesoverdues`, async (req, res, next) => {
             and d.GrandTotal > d.PymtAmtRecd ) a`,
 			(err, data) => {
 				if (err) logger.error(err);
-				console.log(data);
+				// console.log(data);
 				res.send(data);
 			}
 		);
@@ -1243,7 +1243,7 @@ customerRouter.post(`/customerduesoverdues`, async (req, res, next) => {
 
 // Customer - Part Payment Duelist data
 customerRouter.post(`/pprcustomerduelist`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const custcode = req.body.custcode;
 		if (!custcode) return res.send(createError.BadRequest());
@@ -1272,7 +1272,7 @@ customerRouter.post(`/pprcustomerduelist`, async (req, res, next) => {
 //Sned mails
 
 customerRouter.post(`/sendmailwithattachment`, async (req, res, next) => {
-	console.log("Send Mails with Attachment");
+	// console.log("Send Mails with Attachment");
 	try {
 		const mailto = req.body.to;
 		const copyto = req.body.cc;
@@ -1282,7 +1282,7 @@ customerRouter.post(`/sendmailwithattachment`, async (req, res, next) => {
 
 		sendDueList(custdata, duestypedata, duedata, (err, data) => {
 			if (err) logger.error(err);
-			console.log(data);
+			// console.log(data);
 		});
 	} catch (error) {
 		next(error);
@@ -1291,7 +1291,7 @@ customerRouter.post(`/sendmailwithattachment`, async (req, res, next) => {
 
 // Customer Invoice form data from dc_invno
 customerRouter.post(`/customerdlinvform`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const dcinvno = req.body.dcinvno;
 		if (!dcinvno) return res.send(createError.BadRequest());
@@ -1310,7 +1310,7 @@ customerRouter.post(`/customerdlinvform`, async (req, res, next) => {
 
 // Customer Invoice form data from dc_invno - Tax Details
 customerRouter.post(`/customerdlinvformtaxdets`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const dcinvno = req.body.dcinvno;
 		if (!dcinvno) return res.send(createError.BadRequest());
@@ -1329,7 +1329,7 @@ customerRouter.post(`/customerdlinvformtaxdets`, async (req, res, next) => {
 
 // Customer Dues Summary
 customerRouter.post(`/customerduessummary`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const custcode = req.body.custcode;
 		if (!custcode) return res.send(createError.BadRequest());
@@ -1380,7 +1380,7 @@ customerRouter.post(`/customerduessummary`, async (req, res, next) => {
 // Customers Outstanding Summary
 
 customerRouter.post(`/customeroutstandings`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		//        const custcode = req.body.custcode;
 		//      if (!custcode) return res.send(createError.BadRequest())
@@ -1473,7 +1473,7 @@ customerRouter.post(`/customeroutstandings`, async (req, res, next) => {
 // customer outstanding invoices
 
 customerRouter.post(`/outstandinginvoices`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const custcode = req.body.custcode;
 		if (!custcode) return res.send(createError.BadRequest());
@@ -1485,7 +1485,7 @@ customerRouter.post(`/outstandinginvoices`, async (req, res, next) => {
         WHERE  ddir.DCStatus ='Despatched' AND ddir.Cust_Code='${custcode}' ORDER BY ddir.Inv_Date`,
 			(err, data) => {
 				if (err) logger.error(err);
-				console.log(data);
+				// console.log(data);
 				res.send(data);
 			}
 		);
@@ -1495,7 +1495,7 @@ customerRouter.post(`/outstandinginvoices`, async (req, res, next) => {
 });
 // Customer Receipts Info
 customerRouter.post(`/customerreceiptsinfo`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const custcode = req.body.custcode;
 		if (!custcode) return res.send(createError.BadRequest());
@@ -1514,7 +1514,7 @@ customerRouter.post(`/customerreceiptsinfo`, async (req, res, next) => {
 
 // Customer Receipts Details
 customerRouter.post(`/customerreceiptdets`, async (req, res, next) => {
-	console.log(req.body);
+	// console.log(req.body);
 	try {
 		const recdpvid = req.body.recdpvid;
 		if (!recdpvid) return res.send(createError.BadRequest());

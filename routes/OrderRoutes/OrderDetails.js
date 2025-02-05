@@ -12,7 +12,7 @@ const { logger } = require("../../helpers/logger");
 const moment = require("moment");
 
 OrderDetailsRouter.post(`/insertnewsrldata`, async (req, res, next) => {
-  console.log("entering into insertnewsrldata...");
+  // console.log("entering into insertnewsrldata...");
   //console.log("req.body", req.body);
   let ressrldata = [];
   if (req.body.requestData.flag === 1 || req.body.requestData.flag === 3) {
@@ -138,10 +138,10 @@ OrderDetailsRouter.post(`/insertnewsrldata`, async (req, res, next) => {
       logger.error(error);
     }
   } else if (req.body.requestData.flag === 2) {
-    console.log("Flag : ", req.body.requestData.flag);
+    // console.log("Flag : ", req.body.requestData.flag);
 
     try {
-      console.log("Order No : " + req.body.requestData.imprtDwgData["OrderNo"]);
+      // console.log("Order No : " + req.body.requestData.imprtDwgData["OrderNo"]);
 
       // console.log(
       // 	"File Name 1: ",
@@ -162,11 +162,11 @@ OrderDetailsRouter.post(`/insertnewsrldata`, async (req, res, next) => {
                 i < req.body.requestData.imprtDwgData.impDwgFileData.length;
                 i++
               ) {
-                console.log("i : ", i);
-                console.log(
-                  "File Name : ",
-                  req.body.requestData.imprtDwgData.impDwgFileData[i].file
-                );
+                // console.log("i : ", i);
+                // console.log(
+                //   "File Name : ",
+                //   req.body.requestData.imprtDwgData.impDwgFileData[i].file
+                // );
 
                 const orderNo = req.body.requestData.imprtDwgData.OrderNo;
                 const newOrderSrl = i + 1; // req.body.requestData.imprtDwgData.newOrderSrl;
@@ -257,7 +257,7 @@ OrderDetailsRouter.post(`/insertnewsrldata`, async (req, res, next) => {
                       ressrldata.push(srldata);
                       //res.send(srldata);
                     }
-                    console.log("srldata...123", srldata);
+                    // console.log("srldata...123", srldata);
                   }
                 );
               }
@@ -551,7 +551,7 @@ OrderDetailsRouter.post(`/LoadArrival`, async (req, res, next) => {
 });
 
 OrderDetailsRouter.post(`/LoadArrival2`, async (req, res, next) => {
-  console.log("reqqqqqqqq", req.body);
+  // console.log("reqqqqqqqq", req.body);
   try {
     misQueryMod(
       `SELECT m.rvID, m.Mtrl_Code, m.DynamicPara1, m.DynamicPara2, m.Qty, m.updated 
@@ -561,7 +561,7 @@ OrderDetailsRouter.post(`/LoadArrival2`, async (req, res, next) => {
           //console.log("error", err);
           res.status(500).send("Internal Server Error");
         } else {
-          console.log("data1", data1);
+          // console.log("data1", data1);
           res.send(data1);
         }
       }
@@ -852,35 +852,21 @@ OrderDetailsRouter.post("/bulkChangeUpdate", async (req, res, next) => {
   }
 });
 
-// ORDER table values update
+//ORDER table values update
 OrderDetailsRouter.post("/ordertablevaluesupdate", async (req, res, next) => {
-  console.log("enter into ordertablevaluesupdate");
-  console.log("req.body", req.body.LastSlctedRow);
+  // console.log("req.body", req.body);
 
   try {
-    console.log("req.body.orderNo", req.body.orderNo);
-    console.log(
-      "req.body.LastSlctedRow.Order_Srl",
-      req.body.LastSlctedRow.Order_Srl
-    );
     const qtyOrdered = parseInt(req.body.LastSlctedRow.Qty_Ordered);
-    console.log("qtyOrdered", qtyOrdered);
-
     const materialRate = parseFloat(req.body.LastSlctedRow.MtrlCost);
-    console.log("materialRate", materialRate);
-
     const jwRate = parseFloat(req.body.LastSlctedRow.JWCost);
+
+    console.log("qtyOrdered", qtyOrdered);
+    console.log("materialRate", materialRate);
     console.log("jwRate", jwRate);
+    console.log("orderNo", req.body.orderNo, jwRate);
+    console.log("Order_Srl", req.body.LastSlctedRow.Order_Srl);
 
-    // const updateQuery = `
-    //     UPDATE magodmis.order_details
-    //     SET
-    //       Qty_Ordered = CASE WHEN ${qtyOrdered} IS NOT NULL THEN ${qtyOrdered} ELSE Qty_Ordered END,
-    //       JWCost = CASE WHEN ${jwRate} IS NOT NULL THEN ${jwRate} ELSE JWCost END,
-    //      MtrlCost = CASE WHEN ${materialRate} IS NOT NULL THEN ${materialRate} ELSE MtrlCost END,
-
-    //     WHERE Order_No = ${req.body.orderNo} AND Order_Srl = ${req.body.LastSlctedRow.Order_Srl}
-    //   `;
     const updateQuery = `
     UPDATE magodmis.order_details
     SET
@@ -892,12 +878,10 @@ OrderDetailsRouter.post("/ordertablevaluesupdate", async (req, res, next) => {
 
     misQueryMod(updateQuery, (err, cngdata) => {
       if (err) {
-        console.log("err", err);
+        // console.log("err", err);
         logger.error(err);
-        // res.send("error");
         return next(err);
       } else {
-        console.log("cngdata", cngdata);
         // res.send(singlecngdata);
         misQueryMod(
           `SELECT ordervalue FROM magodmis.order_list WHERE order_no = '${req.body.orderNo}'`,
@@ -927,9 +911,7 @@ OrderDetailsRouter.post("/ordertablevaluesupdate", async (req, res, next) => {
                   logger.error(err);
                   return res.status(500).send("Error updating order value.");
                 }
-
-                console.log("updateResult", updateResult);
-
+                // console.log("updateResult", updateResult);
                 res.send({ cngdata, updateResult });
               }
             );
@@ -941,89 +923,10 @@ OrderDetailsRouter.post("/ordertablevaluesupdate", async (req, res, next) => {
     next(error);
   }
 });
-// OrderDetailsRouter.post("/singleChangeUpdate", async (req, res, next) => {
-//   //console.log("enter into singleChangeUpdate");
-//   console.log("req.body", req.body);
-
-//   try {
-//     const qtyOrdered = parseInt(req.body.quantity);
-//     const jwRate = parseFloat(req.body.JwCost);
-//     const materialRate = parseFloat(req.body.mtrlcost);
-//     const unitPrice = parseFloat(req.body.unitPrice);
-//     const Operation = req.body.Operation;
-//     const InspLvl = req.body.InspLvl;
-//     const PkngLvl = req.body.PkngLvl;
-//     const DwgName = req.body.DwgName;
-//     const Mtrl_Source = req.body.MtrlSrc;
-//     const Mtrl_Code = req.body.strmtrlcode;
-
-//     const updateQuery = `
-//     UPDATE magodmis.order_details
-//     SET
-//       Qty_Ordered = CASE WHEN ${qtyOrdered} IS NOT NULL THEN ${qtyOrdered} ELSE Qty_Ordered END,
-//       JWCost = CASE WHEN ${jwRate} IS NOT NULL THEN ${jwRate} ELSE JWCost END,
-//      MtrlCost = CASE WHEN ${materialRate} IS NOT NULL THEN ${materialRate} ELSE MtrlCost END,
-//       UnitPrice = CASE WHEN ${unitPrice} IS NOT NULL THEN ${unitPrice} ELSE UnitPrice END,
-//       Operation = '${Operation}',InspLevel='${InspLvl}', PackingLevel='${PkngLvl}',DwgName='${DwgName}',Mtrl_Source='${Mtrl_Source}',Mtrl_Code='${Mtrl_Code}'
-
-//     WHERE Order_No = ${req.body.OrderNo} AND Order_Srl = ${req.body.OrderSrl}
-//   `;
-
-//     misQueryMod(updateQuery, (err, singlecngdata) => {
-//       if (err) {
-//         console.log("err", err);
-//         logger.error(err);
-//         // res.send("error");
-//         return next(err);
-//       } else {
-//         //console.log("blkcngdata", singlecngdata);
-//         // res.send(singlecngdata);
-//         misQueryMod(
-//           `SELECT ordervalue FROM magodmis.order_list WHERE order_no = '${req.body.OrderNo}'`,
-//           (err, result) => {
-//             if (err) {
-//               logger.error(err);
-//               return res
-//                 .status(500)
-//                 .send("Error fetching current order value.");
-//             }
-
-//             if (result.length === 0) {
-//               return res.status(404).send("Order not found.");
-//             }
-
-//             const currentOrderValue = result[0].ordervalue;
-//             const newOrderValue = qtyOrdered * (jwRate + materialRate);
-//             const updatedOrderValue = (currentOrderValue || 0) + newOrderValue;
-
-//             // Step 2: Update the ordervalue
-//             misQueryMod(
-//               `UPDATE magodmis.order_list
-//        SET ordervalue = ${updatedOrderValue}
-//        WHERE order_no = '${req.body.OrderNo}'`,
-//               (err, updateResult) => {
-//                 if (err) {
-//                   logger.error(err);
-//                   return res.status(500).send("Error updating order value.");
-//                 }
-
-//                 console.log("updateResult", updateResult);
-
-//                 res.send({ singlecngdata, updateResult });
-//               }
-//             );
-//           }
-//         );
-//       }
-//     });
-//   } catch (error) {
-//     next(error);
-//   }
-// });
 
 OrderDetailsRouter.post("/singleChangeUpdate", async (req, res, next) => {
-  console.log("enter into singleChangeUpdate -- shravan");
-  console.log("req.body", req.body);
+  // console.log("enter into singleChangeUpdate -- shravan");
+  // console.log("req.body", req.body);
 
   try {
     const qtyOrdered = parseInt(req.body.quantity);
@@ -1091,7 +994,7 @@ OrderDetailsRouter.post("/singleChangeUpdate", async (req, res, next) => {
                   return res.status(500).send("Error updating order value.");
                 }
 
-                console.log("updateResult", updateResult);
+                // console.log("updateResult", updateResult);
 
                 res.send({ singlecngdata, updateResult });
               }
@@ -1112,7 +1015,7 @@ OrderDetailsRouter.post(`/postDeleteDetailsBySrl`, async (req, res, next) => {
     const selectedItems = req.body.selectedItems; // Assuming req.body.selectedSrl is an array like [1, 2]
 
     for (let i = 0; i < selectedItems.length; i++) {
-      console.log("selectItem", selectedItems[i].Order_Srl);
+      // console.log("selectItem", selectedItems[i].Order_Srl);
       misQueryMod(
         `DELETE FROM magodmis.order_details WHERE (Order_No = '${req.body.Order_No}') AND (Order_Srl = '${selectedItems[i].Order_Srl}');`,
         (err, deleteOrderData) => {
@@ -1120,9 +1023,9 @@ OrderDetailsRouter.post(`/postDeleteDetailsBySrl`, async (req, res, next) => {
             console.error(err);
             res.status(500).send("Internal Server Error");
           } else {
-            console.log(
-              `Deleted order with Order_No '${req.body.Order_No}' and Order_Srl '${selectedItems[i].Order_Srl}'`
-            );
+            // console.log(
+            //   `Deleted order with Order_No '${req.body.Order_No}' and Order_Srl '${selectedItems[i].Order_Srl}'`
+            // );
           }
         }
       );

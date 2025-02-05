@@ -20,7 +20,7 @@ materialRouter.get("/allmaterials", async (req, res, next) => {
 
 materialRouter.get("/getmtrldetails", async (req, res, next) => {
 	try {
-		console.log("mtrldetails");
+		// console.log("mtrldetails");
 		misQueryMod(
 			"Select Concat(Shape,' ',MtrlGradeID) as Material from magodmis.mtrl_data where shape='Units' order by MtrlGradeID asc",
 			(err, data) => {
@@ -46,7 +46,7 @@ materialRouter.get("/getmtrllocation", async (req, res, next) => {
 });
 
 materialRouter.post(`/getmtrldetsbymtrlcode`, async (req, res, next) => {
-	console.log("getmtrldetsbymtrlcode : " + req.body.MtrlCode);
+	// console.log("getmtrldetsbymtrlcode : " + req.body.MtrlCode);
 	try {
 		//    console.log(req.body.mtrlcode);
 		misQueryMod(

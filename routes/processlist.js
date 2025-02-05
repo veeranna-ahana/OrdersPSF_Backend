@@ -49,7 +49,7 @@ ON
         `;
 
 		misQuery(sqlQuery, (data) => {
-			console.log("data", data);
+			// console.log("data", data);
 			res.send(data);
 		});
 	} catch (error) {

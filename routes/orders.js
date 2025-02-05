@@ -33,9 +33,9 @@ ordersRouter.post(`/savecreateorder`, async (req, res, next) => {
       ":" +
       zzz.getSeconds();
     const ordertype = req.body.ordertype;
-    console.log("ordertyp...123e", ordertype);
+    // console.log("ordertyp...123e", ordertype);
     const type = req.body.type;
-    console.log("type...123", type);
+    // console.log("type...123", type);
 
     const purchaseorder = req.body.purchaseorder;
     const qtnno = req.body.qtnno;
@@ -406,7 +406,7 @@ ordersRouter.post(`/getorderstatuslist`, async (req, res, next) => {
 
 ordersRouter.post("/getOrderDataforFindOrder", async (req, res) => {
   // console.log("req.body -", req.body);
-  console.log("req.body -", req.body.ordtype);
+  // console.log("req.body -", req.body.ordtype);
   try {
     misQueryMod(
       `SELECT o.Order_No,o.Cust_Code
@@ -424,7 +424,7 @@ ordersRouter.post("/getOrderDataforFindOrder", async (req, res) => {
 });
 
 ordersRouter.post(`/getOrderDetailsByOrdrNoAndType`, async (req, res, next) => {
-  console.log("req 123", req.body);
+  // console.log("req 123", req.body);
   try {
     // const ordtype = req.body.ordtype;
     misQueryMod(
@@ -445,12 +445,12 @@ ordersRouter.post(`/getOrderDetailsByOrdrNoAndType`, async (req, res, next) => {
                   magodmis.order_list.Order_No = '${req.body.orderNo}'`,
               async (err, custData) => {
                 if (err) logger.error(err);
-                console.log(
-                  "orderData",
-                  orderData.length,
-                  "custDat",
-                  custData.length
-                );
+                // console.log(
+                //   "orderData",
+                //   orderData.length,
+                //   "custDat",
+                //   custData.length
+                // );
 
                 res.send({ orderData: orderData, custData: custData });
               }
@@ -467,7 +467,7 @@ ordersRouter.post(`/getOrderDetailsByOrdrNoAndType`, async (req, res, next) => {
   }
 });
 ordersRouter.post(`/updateOrderDetails`, async (req, res, next) => {
-  console.log("req", req.body);
+  // console.log("req", req.body);
 
   try {
     const { orderNo, deliveryDate, delEngr } = req.body;
@@ -480,7 +480,7 @@ ordersRouter.post(`/updateOrderDetails`, async (req, res, next) => {
           logger.error(err);
           res.status(500).send({ error: "Update failed" });
         } else {
-          console.log("fields updated successfully");
+          // console.log("fields updated successfully");
           res.send({ success: true, updatedFields: { deliveryDate, delEngr } });
         }
       }
@@ -521,7 +521,7 @@ ordersRouter.post("/registerOrder", async (req, res, next) => {
         if (err) {
           console.log(err);
         } else {
-          console.log("data", data);
+          // console.log("data", data);
           res.send(data);
         }
       }
